@@ -4,13 +4,13 @@ const chatHistory = document.getElementById('chat-history');
 const statusMessage = document.getElementById('status-message');
 
 // Gemini APIの設定
-const API_KEY = 'ここにあなたのGemini APIキーを貼り付けてください';
+const API_KEY = 'AIzaSyAYA87F-5ec_KPQqwvcZ37y801yMEJdews'
 const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${API_KEY}`;
 
 // Web Speech API の準備
 const SpeechRecognition = window.SpeechRecognition |
 
-| window.webkitSpeechRecognition;
+ window.webkitSpeechRecognition;
 const recognition = SpeechRecognition? new SpeechRecognition() : null;
 const synth = window.speechSynthesis;
 
