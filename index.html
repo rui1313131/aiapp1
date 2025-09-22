@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI音声チャット - マイルストーン1</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>AI音声チャット (テキスト入力版)</h1>
+        <p class="description">AIへのメッセージを入力し、「送信」ボタンを押してください。AIの返答が音声で再生されます。</p>
+        
+        <div id="chat-history"></div>
+
+        <div class="input-area">
+            <textarea id="user-input" placeholder="ここにメッセージを入力..."></textarea>
+            <button id="send-button">送信</button>
+        </div>
+
+        <div id="status-message" class="status"></div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
