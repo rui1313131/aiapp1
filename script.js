@@ -175,9 +175,10 @@ if (recognition) {
     });
 }
 
-// ▼ここからLive2Dの処理▼
+// ▼ここからLive2Dの処理（最終修正版）▼
 (async function main() {
-    const modelPath = './assets/live2d_models/kei_jp/kei.model3.json';
+    // Live2Dモデルのパスを指定 (先頭のスラッシュが重要)
+    const modelPath = '/assets/live2d_models/kei_jp/kei.model3.json';
 
     // PIXIのApplicationを作成
     const app = new PIXI.Application({
@@ -185,6 +186,7 @@ if (recognition) {
         autoStart: true,
         resizeTo: avatarContainer,
         backgroundColor: 0xFFFFFF,
+        backgroundAlpha: 0.1, // 背景を少し透過させる
     });
 
     // Live2Dモデルを読み込み、描画領域に追加
@@ -192,10 +194,3 @@ if (recognition) {
     app.stage.addChild(model);
 
     // モデルのサイズと位置を調整
-    model.anchor.set(0.5, 0.5);
-    const scale = Math.min(avatarContainer.clientWidth / model.width, avatarContainer.clientHeight / model.height) * 0.9;
-    model.scale.set(scale);
-    model.position.set(avatarContainer.clientWidth / 2, avatarContainer.clientHeight / 2);
-
-})();
-// ▲ここまでLive2Dの処理▲
