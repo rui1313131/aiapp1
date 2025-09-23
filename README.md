@@ -8,7 +8,7 @@ Googleの最新AIであるGeminiと、Webブラウザだけで**テキストと�
 
 以下のURLから、今すぐアプリを体験できます！
 
-**[ここにVercelで公開したURLを貼り付けてください]**
+**[https://ai-pi-eight-54.vercel.app/]**
 
 ---
 
