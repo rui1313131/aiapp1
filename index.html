@@ -3,25 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AIハイブリッドチャット</title>
+    <title>AIアバターチャット</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="container">
-        <h1>AIハイブリッドチャット 💬+🎤</h1>
-        <p class="description">メッセージを入力するか、マイクボタンを押して話しかけてください。</p>
-        
-        <div id="chat-history"></div>
-
-        <div class="control-area">
-            <textarea id="user-input" placeholder="ここにメッセージを入力..."></textarea>
-            <button id="send-button">送信</button>
-            <button id="talk-button">🎤</button>
+    <div class="app-wrapper">
+        <div id="avatar-container">
+            <canvas id="live2d-canvas"></canvas>
+            <button id="fullscreen-avatar-btn" class="fullscreen-btn">↑↓</button>
         </div>
 
-        <div id="status-message" class="status">準備完了</div>
+        <div id="chat-container">
+            <div class="container">
+                <div id="chat-history"></div>
+                <div class="control-area">
+                    <textarea id="user-input" placeholder="ここにメッセージを入力..."></textarea>
+                    <button id="send-button">送信</button>
+                    <button id="talk-button">🎤</button>
+                </div>
+                <div id="status-message" class="status">準備完了</div>
+            </div>
+            <button id="fullscreen-chat-btn" class="fullscreen-btn">↑↓</button>
+        </div>
     </div>
 
+    <script src="https://pixijs.download/v6.5.2/pixi.min.js"></script>
+    <script src="./live2d-sdk/live2dcubismcore.min.js"></script>
+    <script src="./live2d-sdk/live2dcubismframework.js"></script>
+    
     <script src="script.js"></script>
 </body>
 </html>

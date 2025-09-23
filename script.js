@@ -4,6 +4,11 @@ const statusMessage = document.getElementById('status-message');
 const sendButton = document.getElementById('send-button');
 const userInput = document.getElementById('user-input');
 const talkButton = document.getElementById('talk-button');
+const avatarContainer = document.getElementById('avatar-container');
+const chatContainer = document.getElementById('chat-container');
+const fullscreenAvatarBtn = document.getElementById('fullscreen-avatar-btn');
+const fullscreenChatBtn = document.getElementById('fullscreen-chat-btn');
+const canvas = document.getElementById('live2d-canvas');
 
 // Web Speech API の準備
 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -12,6 +17,17 @@ const synth = window.speechSynthesis;
 
 let isListening = false;
 let isSpeaking = false;
+
+// 全画面切り替えイベント
+fullscreenAvatarBtn.addEventListener('click', () => {
+    avatarContainer.classList.toggle('fullscreen');
+    chatContainer.classList.toggle('hidden');
+});
+
+fullscreenChatBtn.addEventListener('click', () => {
+    chatContainer.classList.toggle('fullscreen');
+    avatarContainer.classList.toggle('hidden');
+});
 
 // UIの状態を管理する関数
 function setUiLoading(isLoading) {
@@ -37,29 +53,21 @@ if (!synth) {
  * 画面にメッセージを表示する関数 (LINE風表示に対応)
  */
 function displayMessage(text, sender) {
-    // コンテナと名前ラベル、メッセージ本体を作成
     const messageContainer = document.createElement('div');
     const senderName = document.createElement('div');
     const messageDiv = document.createElement('div');
-
-    // 誰からのメッセージかでクラスと名前を設定
     if (sender === 'user') {
         messageContainer.classList.add('user-container');
-        senderName.textContent = 'You'; // あなたの名前
+        senderName.textContent = 'You';
     } else {
         messageContainer.classList.add('ai-container');
-        senderName.textContent = 'AI'; // AIの名前
+        senderName.textContent = 'AI';
     }
-    
     senderName.classList.add('sender-name');
     messageDiv.classList.add('message', sender === 'user' ? 'user-message' : 'ai-message');
     messageDiv.textContent = text;
-
-    // 作成した要素を組み立てる
     messageContainer.appendChild(senderName);
     messageContainer.appendChild(messageDiv);
-    
-    // チャット履歴に追加してスクロール
     chatHistory.appendChild(messageContainer);
     chatHistory.scrollTop = chatHistory.scrollHeight;
 }
@@ -81,17 +89,14 @@ function speak(text) {
                 isSpeaking = false;
                 reject(event.error);
             };
-            // 利用可能な日本語の音声を探して設定
             const japaneseVoice = synth.getVoices().find(voice => voice.lang.startsWith('ja'));
             if (japaneseVoice) utterThis.voice = japaneseVoice;
-            
             synth.speak(utterThis);
         } else {
             resolve();
         }
     });
 }
-// ブラウザによっては音声リストの読み込みが非同期なため、イベントで再取得
 if (synth.onvoiceschanged !== undefined) {
     synth.onvoiceschanged = () => synth.getVoices();
 }
@@ -108,19 +113,15 @@ async function getGeminiResponse(prompt) {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ prompt: prompt }),
         });
-
         if (!response.ok) {
             const errorData = await response.json();
             throw new Error(errorData.message || `HTTPエラー: ${response.status}`);
         }
-
         const data = await response.json();
         const aiText = data.candidates[0].content.parts[0].text;
-        
         displayMessage(aiText, 'ai');
         statusMessage.textContent = 'AIが応答を読み上げています...';
         await speak(aiText);
-
     } catch (error) {
         console.error('リクエスト中にエラーが発生しました:', error);
         const errorMessage = `エラーが発生しました: ${error.message}`;
@@ -153,38 +154,48 @@ userInput.addEventListener('keydown', (event) => {
     }
 });
 
+// 音声認識の処理
 if (recognition) {
     recognition.lang = 'ja-JP';
-    recognition.interimResults = false;
-    recognition.continuous = false;
-
     recognition.onresult = (event) => {
         const userText = event.results[0][0].transcript;
         displayMessage(userText, 'user');
         getGeminiResponse(userText);
     };
-    recognition.onerror = (event) => {
-        console.error('音声認識エラー:', event.error);
-        statusMessage.textContent = `認識エラー: ${event.error}`;
-    };
     recognition.onend = () => {
         isListening = false;
-        talkButton.classList.remove('listening');
         setUiLoading(false);
-        if (statusMessage.textContent === '話してください...') {
-            statusMessage.textContent = '準備完了';
-        }
     };
-
     talkButton.addEventListener('click', () => {
-        if (isListening) {
-            recognition.stop();
-        } else {
+        if (!isListening) {
             recognition.start();
             isListening = true;
-            talkButton.classList.add('listening');
-            setUiLoading(true); // 音声認識中もボタンは無効
-            statusMessage.textContent = '話してください...';
+            setUiLoading(true);
         }
     });
 }
+
+// ▼ここからLive2Dの処理▼
+(async function main() {
+    const modelPath = './assets/live2d_models/kei_jp/kei.model3.json';
+
+    // PIXIのApplicationを作成
+    const app = new PIXI.Application({
+        view: canvas,
+        autoStart: true,
+        resizeTo: avatarContainer,
+        backgroundColor: 0xFFFFFF,
+    });
+
+    // Live2Dモデルを読み込み、描画領域に追加
+    const model = await PIXI.live2d.Live2DModel.from(modelPath);
+    app.stage.addChild(model);
+
+    // モデルのサイズと位置を調整
+    model.anchor.set(0.5, 0.5);
+    const scale = Math.min(avatarContainer.clientWidth / model.width, avatarContainer.clientHeight / model.height) * 0.9;
+    model.scale.set(scale);
+    model.position.set(avatarContainer.clientWidth / 2, avatarContainer.clientHeight / 2);
+
+})();
+// ▲ここまでLive2Dの処理▲
