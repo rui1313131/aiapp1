@@ -1,31 +1,118 @@
-/*... 既存のCSS... */
-.input-area { /* このクラスはもう使わないので削除またはコメントアウト */
-    /* display: flex; */
-    /* gap: 10px; */
+:root {
+    --primary-color: #4285F4;
+    --background-color: #f0f2f5;
+    --text-color: #333;
+    --user-message-bg: #dcf8c6;
+    --ai-message-bg: #fff;
+    --container-bg: #ffffff;
 }
-/*... */
-.control-area {
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background-color: var(--background-color);
+    margin: 0;
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    box-sizing: border-box;
+}
+.container {
+    width: 100%;
+    max-width: 700px;
+    height: 90vh;
+    background-color: var(--container-bg);
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+h1 {
+    font-size: 24px;
     text-align: center;
+    color: var(--text-color);
+    padding: 15px;
+    margin: 0;
+    border-bottom: 1px solid #ddd;
 }
-
-#talk-button {
-    padding: 15px 30px;
-    font-size: 18px;
-    border-radius: 50px;
+.description {
+    font-size: 14px;
+    text-align: center;
+    padding: 0 15px 15px;
+    color: #666;
+}
+#chat-history {
+    flex-grow: 1;
+    overflow-y: auto;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+.message {
+    padding: 10px 15px;
+    border-radius: 18px;
+    max-width: 80%;
+    word-wrap: break-word;
+}
+.user-message {
+    background-color: var(--user-message-bg);
+    align-self: flex-end;
+    border-bottom-right-radius: 4px;
+}
+.ai-message {
+    background-color: var(--ai-message-bg);
+    align-self: flex-start;
+    border: 1px solid #eee;
+    border-bottom-left-radius: 4px;
+}
+.control-area {
+    display: flex;
+    gap: 10px;
+    padding: 10px;
+    border-top: 1px solid #ddd;
+    background-color: #f9f9f9;
+}
+#user-input {
+    flex-grow: 1;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 16px;
+    resize: none;
+    height: 24px;
+}
+#send-button, #talk-button {
+    padding: 10px 15px;
+    font-size: 16px;
+    border-radius: 8px;
     border: none;
     cursor: pointer;
     background-color: var(--primary-color);
     color: white;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    transition: background-color 0.2s ease;
+    flex-shrink: 0;
 }
-
-#talk-button:hover:not(:disabled) {
+#talk-button {
+    font-size: 20px;
+    padding: 10px 12px;
+}
+#send-button:hover:not(:disabled), #talk-button:hover:not(:disabled) {
     background-color: #3367D6;
-    transform: translateY(-2px);
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
 }
-
 #talk-button.listening {
-    background-color: #D93025; /* 赤色で聞き取り中を示す */
+    background-color: #D93025;
+}
+button:disabled {
+    background-color: #9E9E9E;
+    cursor: not-allowed;
+}
+.status {
+    padding: 5px 10px;
+    color: #666;
+    font-size: 14px;
+    text-align: center;
+    height: 20px;
+    background-color: #f9f9f9;
 }

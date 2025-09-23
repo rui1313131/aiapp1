@@ -3,22 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI音声チャット - マイルストーン1</title>
+    <title>AIハイブリッドチャット</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="container">
-        <h1>AI音声チャット (テキスト入力版)</h1>
-        <p class="description">AIへのメッセージを入力し、「送信」ボタンを押してください。AIの返答が音声で再生されます。</p>
+        <h1>AIハイブリッドチャット 💬+🎤</h1>
+        <p class="description">メッセージを入力するか、マイクボタンを押して話しかけてください。</p>
         
         <div id="chat-history"></div>
 
-        <div class="input-area">
+        <div class="control-area">
             <textarea id="user-input" placeholder="ここにメッセージを入力..."></textarea>
             <button id="send-button">送信</button>
+            <button id="talk-button">🎤</button>
         </div>
 
-        <div id="status-message" class="status"></div>
+        <div id="status-message" class="status">準備完了</div>
     </div>
 
     <script src="script.js"></script>

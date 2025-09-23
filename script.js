@@ -1,148 +1,170 @@
 // DOM要素の取得
-const talkButton = document.getElementById('talk-button');
 const chatHistory = document.getElementById('chat-history');
 const statusMessage = document.getElementById('status-message');
-
-// Gemini APIの設定
-const API_KEY = 'AIzaSyAYA87F-5ec_KPQqwvcZ37y801yMEJdews'
-const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${API_KEY}`;
+const sendButton = document.getElementById('send-button');
+const userInput = document.getElementById('user-input');
+const talkButton = document.getElementById('talk-button');
 
 // Web Speech API の準備
-const SpeechRecognition = window.SpeechRecognition |
-
- window.webkitSpeechRecognition;
-const recognition = SpeechRecognition? new SpeechRecognition() : null;
+const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+const recognition = SpeechRecognition ? new SpeechRecognition() : null;
 const synth = window.speechSynthesis;
 
 let isListening = false;
+let isSpeaking = false;
 
-// APIサポートのチェック
-if (!recognition ||!synth) {
-    statusMessage.textContent = "お使いのブラウザはWeb Speech APIに対応していません。";
+// UIの状態を管理する関数
+function setUiLoading(isLoading) {
+    if (isLoading) {
+        sendButton.disabled = true;
+        talkButton.disabled = true;
+    } else {
+        sendButton.disabled = false;
+        talkButton.disabled = false;
+    }
+}
+
+// サポートチェック
+if (!recognition) {
     talkButton.disabled = true;
-} else {
-    // 音声認識の設定
-    recognition.lang = 'ja-JP'; // 日本語に設定
-    recognition.interimResults = false; // 最終結果のみ取得
-    recognition.continuous = false; // 一度の発話で認識を終了
+    statusMessage.textContent = "お使いのブラウザは音声認識に非対応です。";
+}
+if (!synth) {
+    statusMessage.textContent = "お使いのブラウザは音声合成に非対応です。";
 }
 
 /**
  * 画面にメッセージを表示する関数
- * @param {string} text - 表示するテキスト
- * @param {string} sender - 'user' または 'ai'
  */
 function displayMessage(text, sender) {
     const messageDiv = document.createElement('div');
-    messageDiv.classList.add('message', sender === 'user'? 'user-message' : 'ai-message');
+    messageDiv.classList.add('message', sender === 'user' ? 'user-message' : 'ai-message');
     messageDiv.textContent = text;
     chatHistory.appendChild(messageDiv);
-    chatHistory.scrollTop = chatHistory.scrollHeight;
+    chatHistory.scrollTop = chatHistory.scrollHeight; // 自動スクロール
 }
 
 /**
  * テキストを音声で読み上げる関数
- * @param {string} text - 読み上げるテキスト
- * @returns {Promise<void>} 読み上げが完了したら解決するPromise
  */
 function speak(text) {
     return new Promise((resolve, reject) => {
-        if (synth.speaking) {
-            synth.cancel(); // 念のため既存の読み上げをキャンセル
-        }
-        if (text!== '') {
+        if (isSpeaking) synth.cancel();
+        if (text) {
+            isSpeaking = true;
             const utterThis = new SpeechSynthesisUtterance(text);
             utterThis.onend = () => {
-                statusMessage.textContent = '応答完了。';
+                isSpeaking = false;
                 resolve();
             };
             utterThis.onerror = (event) => {
-                statusMessage.textContent = `読み上げエラー: ${event.error}`;
+                isSpeaking = false;
                 reject(event.error);
             };
+            // 利用可能な日本語の音声を探して設定
             const japaneseVoice = synth.getVoices().find(voice => voice.lang.startsWith('ja'));
-            if (japaneseVoice) {
-                utterThis.voice = japaneseVoice;
-            }
+            if (japaneseVoice) utterThis.voice = japaneseVoice;
+            
             synth.speak(utterThis);
         } else {
-            resolve(); // テキストが空なら即座に解決
+            resolve();
         }
     });
 }
+// ブラウザによっては音声リストの読み込みが非同期なため、イベントで再取得
+if (synth.onvoiceschanged !== undefined) {
+    synth.onvoiceschanged = () => synth.getVoices();
+}
 
 /**
- * Gemini APIにリクエストを送信し、応答を取得する関数
- * @param {string} prompt - ユーザーからの入力プロンプト
+ * サーバー経由でGemini APIにリクエストを送信する関数
  */
 async function getGeminiResponse(prompt) {
+    setUiLoading(true);
+    statusMessage.textContent = 'AIが応答を考えています...';
     try {
-        statusMessage.textContent = 'AIが応答を考えています...';
-        talkButton.disabled = true;
-
-        const payload = {
-            contents: [{ parts: [{ text: prompt }] }]
-        };
-
-        const response = await fetch(API_URL, {
+        const response = await fetch('/api/gemini', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload),
+            body: JSON.stringify({ prompt: prompt }),
         });
 
         if (!response.ok) {
-            throw new Error(`APIエラー: ${response.status} ${response.statusText}`);
+            const errorData = await response.json();
+            throw new Error(errorData.message || `HTTPエラー: ${response.status}`);
         }
 
         const data = await response.json();
-        const aiText = data.candidates.content.parts.text;
+        const aiText = data.candidates[0].content.parts[0].text;
         
         displayMessage(aiText, 'ai');
-        await speak(aiText); // 読み上げが終わるまで待つ
+        statusMessage.textContent = 'AIが応答を読み上げています...';
+        await speak(aiText);
 
     } catch (error) {
-        console.error('Gemini APIリクエスト中にエラーが発生しました:', error);
-        statusMessage.textContent = `エラー: ${error.message}`;
-        displayMessage(`エラーが発生しました。`, 'ai');
+        console.error('リクエスト中にエラーが発生しました:', error);
+        const errorMessage = `エラーが発生しました: ${error.message}`;
+        displayMessage(errorMessage, 'ai');
+        statusMessage.textContent = errorMessage;
     } finally {
-        talkButton.disabled = false;
-        statusMessage.textContent = 'ボタンを押して話しかけてください。';
+        setUiLoading(false);
+        statusMessage.textContent = '準備完了';
     }
 }
 
-// 音声認識のイベントハンドラ
-recognition.onresult = (event) => {
-    const userText = event.results.transcript;
-    displayMessage(userText, 'user');
-    getGeminiResponse(userText);
-};
-
-recognition.onerror = (event) => {
-    console.error('音声認識エラー:', event.error);
-    statusMessage.textContent = `認識エラー: ${event.error}`;
-    isListening = false;
-    talkButton.classList.remove('listening');
-    talkButton.textContent = '🎤 話す';
-};
-
-recognition.onend = () => {
-    if (isListening) {
-        isListening = false;
-        talkButton.classList.remove('listening');
-        talkButton.textContent = '🎤 話す';
+/**
+ * テキスト送信処理
+ */
+async function handleTextInput() {
+    const userText = userInput.value.trim();
+    if (userText) {
+        displayMessage(userText, 'user');
+        userInput.value = '';
+        await getGeminiResponse(userText);
     }
-};
+}
 
-// 話すボタンのクリックイベント
-talkButton.addEventListener('click', () => {
-    if (!isListening) {
-        recognition.start();
-        isListening = true;
-        talkButton.classList.add('listening');
-        talkButton.textContent = '... 聞き取り中';
-        statusMessage.textContent = '話してください...';
-    } else {
-        recognition.stop();
-        // onendイベントで状態がリセットされる
+// イベントリスナーの設定
+sendButton.addEventListener('click', handleTextInput);
+userInput.addEventListener('keydown', (event) => {
+    if (event.key === 'Enter' && !event.shiftKey) {
+        event.preventDefault();
+        handleTextInput();
     }
 });
+
+if (recognition) {
+    recognition.lang = 'ja-JP';
+    recognition.interimResults = false;
+    recognition.continuous = false;
+
+    recognition.onresult = (event) => {
+        const userText = event.results[0][0].transcript;
+        displayMessage(userText, 'user');
+        getGeminiResponse(userText);
+    };
+    recognition.onerror = (event) => {
+        console.error('音声認識エラー:', event.error);
+        statusMessage.textContent = `認識エラー: ${event.error}`;
+    };
+    recognition.onend = () => {
+        isListening = false;
+        talkButton.classList.remove('listening');
+        setUiLoading(false);
+        if (statusMessage.textContent === '話してください...') {
+            statusMessage.textContent = '準備完了';
+        }
+    };
+
+    talkButton.addEventListener('click', () => {
+        if (isListening) {
+            recognition.stop();
+        } else {
+            recognition.start();
+            isListening = true;
+            talkButton.classList.add('listening');
+            setUiLoading(true); // 音声認識中もボタンは無効
+            statusMessage.textContent = '話してください...';
+        }
+    });
+}
