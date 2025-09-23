@@ -1,54 +1,116 @@
 :root {
     --primary-color: #4285F4;
-    --background-color: #f0f2f5;
+    --background-color: #79acdf; /* LINE風の背景色 */
     --text-color: #333;
-    --user-message-bg: #dcf8c6;
+    --user-message-bg: #8de041; /* LINE風のユーザー吹き出し色 */
     --ai-message-bg: #fff;
-    --container-bg: #ffffff;
+    --container-bg: transparent; /* コンテナ背景を透明に */
 }
 body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     background-color: var(--background-color);
     margin: 0;
-    padding: 20px;
+    padding: 10px;
     display: flex;
     justify-content: center;
     align-items: center;
-    min-height: 100vh;
+    height: 100vh;
     box-sizing: border-box;
 }
 .container {
     width: 100%;
-    max-width: 700px;
-    height: 90vh;
-    background-color: var(--container-bg);
-    border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    max-width: 500px; /* スマホ風に少し幅を狭く */
+    height: 100%;
+    background-color: var(--background-color);
     display: flex;
     flex-direction: column;
     overflow: hidden;
 }
 #chat-history {
-    flex-grow: 1; /* この行がチャット履歴を広げ、入力欄を下へ押し出します */
+    flex-grow: 1;
     overflow-y: auto;
-    padding: 20px;
+    padding: 20px 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px; /* メッセージ間の余白 */
 }
-/* ...その他のスタイル... */
+.message-container {
+    display: flex;
+    flex-direction: column;
+    max-width: 80%;
+}
+.sender-name {
+    font-size: 12px;
+    color: #555;
+    margin-bottom: 4px;
+}
+.message {
+    padding: 10px 15px;
+    border-radius: 18px;
+    word-wrap: break-word;
+    position: relative;
+}
+.ai-container {
+    align-self: flex-start;
+    align-items: flex-start;
+}
+.ai-container .sender-name {
+    margin-left: 10px;
+}
+.ai-message {
+    background-color: var(--ai-message-bg);
+    border-bottom-left-radius: 4px;
+}
+.user-container {
+    align-self: flex-end;
+    align-items: flex-end;
+}
+.user-container .sender-name {
+    margin-right: 10px;
+}
+.user-message {
+    background-color: var(--user-message-bg);
+    border-bottom-right-radius: 4px;
+}
 .control-area {
-    /* このエリアが入力欄全体を管理します */
     display: flex;
     gap: 10px;
     padding: 10px;
     border-top: 1px solid #ddd;
-    background-color: #f9f9f9;
+    background-color: #f0f2f5;
 }
 #user-input {
     flex-grow: 1;
     padding: 10px;
     border: 1px solid #ccc;
-    border-radius: 8px;
+    border-radius: 20px;
     font-size: 16px;
     resize: none;
     height: 24px;
 }
-/* ...ボタン等のスタイル... */
+#send-button, #talk-button {
+    padding: 10px 15px;
+    font-size: 16px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    background-color: var(--primary-color);
+    color: white;
+    transition: background-color 0.2s ease;
+    flex-shrink: 0;
+}
+#talk-button {
+    font-size: 20px;
+    padding: 10px 12px;
+}
+#send-button:hover:not(:disabled), #talk-button:hover:not(:disabled) {
+    background-color: #3367D6;
+}
+.status {
+    padding: 5px 10px;
+    color: #666;
+    font-size: 14px;
+    text-align: center;
+    height: 20px;
+    background-color: #f0f2f5;
+}

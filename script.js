@@ -34,14 +34,34 @@ if (!synth) {
 }
 
 /**
- * 画面にメッセージを表示する関数
+ * 画面にメッセージを表示する関数 (LINE風表示に対応)
  */
 function displayMessage(text, sender) {
+    // コンテナと名前ラベル、メッセージ本体を作成
+    const messageContainer = document.createElement('div');
+    const senderName = document.createElement('div');
     const messageDiv = document.createElement('div');
+
+    // 誰からのメッセージかでクラスと名前を設定
+    if (sender === 'user') {
+        messageContainer.classList.add('user-container');
+        senderName.textContent = 'You'; // あなたの名前
+    } else {
+        messageContainer.classList.add('ai-container');
+        senderName.textContent = 'AI'; // AIの名前
+    }
+    
+    senderName.classList.add('sender-name');
     messageDiv.classList.add('message', sender === 'user' ? 'user-message' : 'ai-message');
     messageDiv.textContent = text;
-    chatHistory.appendChild(messageDiv);
-    chatHistory.scrollTop = chatHistory.scrollHeight; // 自動スクロール
+
+    // 作成した要素を組み立てる
+    messageContainer.appendChild(senderName);
+    messageContainer.appendChild(messageDiv);
+    
+    // チャット履歴に追加してスクロール
+    chatHistory.appendChild(messageContainer);
+    chatHistory.scrollTop = chatHistory.scrollHeight;
 }
 
 /**
