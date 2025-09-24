@@ -7,30 +7,30 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="app-wrapper">
+    <div id="app-wrapper">
+        
         <div id="avatar-container">
             <canvas id="live2d-canvas"></canvas>
-            <button id="fullscreen-avatar-btn" class="fullscreen-btn">↑↓</button>
         </div>
 
         <div id="chat-container">
-            <div class="container">
-                <div id="chat-history"></div>
-                <div class="control-area">
-                    <textarea id="user-input" placeholder="ここにメッセージを入力..."></textarea>
-                    <button id="send-button">送信</button>
-                    <button id="talk-button">🎤</button>
+            <div id="chat-history">
                 </div>
-                <div id="status-message" class="status">準備完了</div>
+            <div id="chat-input-area">
+                <input type="text" id="user-input" placeholder="ここにメッセージを入力...">
+                <button id="send-button">送信</button>
             </div>
-            <button id="fullscreen-chat-btn" class="fullscreen-btn">↑↓</button>
         </div>
+
     </div>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/7.4.2/pixi.min.js"></script>
     <script src="https://cubism.live2d.com/sdk-web/cubismcore/live2dcubismcore.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/6.5.2/pixi.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/pixi-live2d-display/dist/index.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/live2d-cubism-sdk-for-web@4.2.0/Framework/live2dcubismframework.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/live2d-cubism-sdk-for-web@4.2.0/Framework/live2dcubismpixi.min.js"></script>
     
-    <script type="module" src="script.js"></script>
+    <script src="https://js.puter.com/v2/"></script>
+
+    <script src="script.js"></script>
 </body>
 </html>

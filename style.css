@@ -1,165 +1,104 @@
-:root {
-    --primary-color: #4285F4;
-    --background-color: #79acdf;
-    --text-color: #333;
-    --user-message-bg: #8de041;
-    --ai-message-bg: #fff;
-}
-html, body {
-    height: 100%;
+/* --- 全体レイアウト --- */
+body, html {
     margin: 0;
-    overflow: hidden; /* スクロールバーを完全に消す */
-}
-body {
-    background-color: #000; /* 背景は黒に */
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-}
-
-/* 全体レイアウト */
-.app-wrapper {
-    display: flex;
-    flex-direction: column;
+    padding: 0;
     width: 100%;
     height: 100%;
-}
-#avatar-container, #chat-container {
-    height: 50%; /* 基本は上下50%に分割 */
-    position: relative;
-    transition: height 0.4s ease-in-out;
-    overflow: hidden;
+    font-family: sans-serif;
+    background-color: #2c2c2c;
+    color: #f0f0f0;
+    overflow: hidden; /* スクロールバーを非表示 */
 }
 
-/* アバターエリア */
+#app-wrapper {
+    display: flex;
+    width: 100vw;
+    height: 100vh;
+}
+
+/* --- アバター表示エリア --- */
 #avatar-container {
-    background: #e0f0ff; /* アバターの仮背景色 */
+    flex: 2; /* 画面の2/3を占める */
     display: flex;
     justify-content: center;
     align-items: center;
+    height: 100%;
+    position: relative;
 }
+
 #live2d-canvas {
     width: 100%;
     height: 100%;
 }
 
-/* チャットエリア */
+/* --- チャットエリア --- */
 #chat-container {
-    background-color: var(--background-color);
-    display: flex;
-    justify-content: center;
-}
-#chat-container .container {
-    width: 100%;
-    max-width: 700px;
-    height: 100%;
+    flex: 1; /* 画面の1/3を占める */
     display: flex;
     flex-direction: column;
+    height: 100%;
+    background-color: #1e1e1e;
+    border-left: 2px solid #444;
 }
 
-/* 全画面表示用のクラス */
-.fullscreen {
-    height: 100% !important;
-}
-.hidden {
-    height: 0 !important;
-    padding: 0;
-    border: none;
-}
-
-/* 全画面切り替えボタン */
-.fullscreen-btn {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    z-index: 100;
-    padding: 5px 10px;
-    font-size: 16px;
-    cursor: pointer;
-    border-radius: 50%;
-    width: 40px;
-    height: 40px;
-    border: 1px solid #ccc;
-    background: rgba(255, 255, 255, 0.8);
-}
-
-/* --- LINE風チャットUIのスタイル --- */
 #chat-history {
     flex-grow: 1;
-    overflow-y: auto;
-    padding: 20px 10px;
+    padding: 15px;
+    overflow-y: auto; /* メッセージが溢れたらスクロール */
     display: flex;
     flex-direction: column;
-    gap: 15px;
+    gap: 12px;
 }
-.message-container {
+
+#chat-input-area {
     display: flex;
-    flex-direction: column;
-    max-width: 80%;
+    padding: 15px;
+    border-top: 2px solid #444;
 }
-.sender-name {
-    font-size: 12px;
-    color: #fff;
-    margin-bottom: 4px;
-    text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
-}
-.message {
-    padding: 10px 15px;
-    border-radius: 18px;
-    word-wrap: break-word;
-}
-.ai-container {
-    align-self: flex-start;
-    align-items: flex-start;
-}
-.ai-container .sender-name {
-    margin-left: 10px;
-}
-.ai-message {
-    background-color: var(--ai-message-bg);
-    border-bottom-left-radius: 4px;
-}
-.user-container {
-    align-self: flex-end;
-    align-items: flex-end;
-}
-.user-container .sender-name {
-    margin-right: 10px;
-}
-.user-message {
-    background-color: var(--user-message-bg);
-    border-bottom-right-radius: 4px;
-}
-.control-area {
-    display: flex;
-    gap: 10px;
-    padding: 10px;
-    border-top: 1px solid #ddd;
-    background-color: #f0f2f5;
-    flex-shrink: 0;
-}
+
 #user-input {
     flex-grow: 1;
     padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 20px;
+    border: 1px solid #555;
+    border-radius: 5px;
+    background-color: #333;
+    color: #fff;
     font-size: 16px;
-    resize: none;
-    height: 24px;
 }
-#send-button, #talk-button {
-    padding: 10px 15px;
+
+#send-button {
+    padding: 10px 20px;
+    margin-left: 10px;
     border: none;
-    cursor: pointer;
-    background-color: var(--primary-color);
+    background-color: #007bff;
     color: white;
-    flex-shrink: 0;
-    border-radius: 8px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
 }
-.status {
-    padding: 5px 10px;
-    color: #333;
-    font-size: 14px;
-    text-align: center;
-    height: 20px;
-    background-color: #f0f2f5;
-    flex-shrink: 0;
+
+#send-button:hover {
+    background-color: #0056b3;
+}
+
+/* --- メッセージのスタイル --- */
+.message {
+    padding: 10px 15px;
+    border-radius: 18px;
+    max-width: 80%;
+    word-wrap: break-word; /* 長い単語を折り返す */
+}
+
+.user {
+    background-color: #007bff;
+    color: white;
+    align-self: flex-end; /* 右寄せ */
+    border-bottom-right-radius: 4px;
+}
+
+.ai {
+    background-color: #444;
+    color: #f0f0f0;
+    align-self: flex-start; /* 左寄せ */
+    border-bottom-left-radius: 4px;
 }
