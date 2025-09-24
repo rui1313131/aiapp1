@@ -50,7 +50,9 @@ if (!synth) {
     statusMessage.textContent = "お使いのブラウザは音声合成に非対応です。";
 }
 
-// 画面にメッセージを表示する関数
+/**
+ * 画面にメッセージを表示する関数 (LINE風表示に対応)
+ */
 function displayMessage(text, sender) {
     const messageContainer = document.createElement('div');
     const senderName = document.createElement('div');
@@ -71,7 +73,9 @@ function displayMessage(text, sender) {
     chatHistory.scrollTop = chatHistory.scrollHeight;
 }
 
-// テキストを音声で読み上げる関数
+/**
+ * テキストを音声で読み上げる関数
+ */
 function speak(text) {
     return new Promise((resolve, reject) => {
         if (isSpeaking) synth.cancel();
@@ -81,7 +85,7 @@ function speak(text) {
             utterThis.onend = () => {
                 isSpeaking = false;
                 if (live2dModel) {
-                    live2dModel.motion('Idle');
+                    live2dModel.motion('Idle'); // 話し終わったら待機モーションに
                 }
                 resolve();
             };
@@ -89,6 +93,7 @@ function speak(text) {
                 isSpeaking = false;
                 reject(event.error);
             };
+            // リップシンクを開始
             if (live2dModel) {
                 live2dModel.motion('Talk');
             }
@@ -104,7 +109,9 @@ if (synth.onvoiceschanged !== undefined) {
     synth.onvoiceschanged = () => synth.getVoices();
 }
 
-// サーバー経由でGemini APIにリクエストを送信する関数
+/**
+ * サーバー経由でGemini APIにリクエストを送信する関数
+ */
 async function getGeminiResponse(prompt) {
     setUiLoading(true);
     statusMessage.textContent = 'AIが応答を考えています...';
@@ -124,9 +131,9 @@ async function getGeminiResponse(prompt) {
         displayMessage(aiText, 'ai');
 
         if (live2dModel && (aiText.includes('嬉しい') || aiText.includes('ありがとう'))) {
-            live2dModel.expression('F02');
+            live2dModel.expression('F02'); // 笑顔
         } else if (live2dModel) {
-            live2dModel.expression('F01');
+            live2dModel.expression('F01'); // 通常の表情
         }
         
         statusMessage.textContent = 'AIが応答を読み上げています...';
@@ -143,7 +150,9 @@ async function getGeminiResponse(prompt) {
     }
 }
 
-// テキスト送信処理
+/**
+ * テキスト送信処理
+ */
 async function handleTextInput() {
     const userText = userInput.value.trim();
     if (userText) {
@@ -221,7 +230,6 @@ async function initLive2D() {
 
     } catch (e) {
         console.error("Live2Dの初期化中に致命的なエラーが発生しました:", e);
-        // ここにエラーメッセージを画面に表示する処理を追加しても良い
     }
 }
 
