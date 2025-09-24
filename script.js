@@ -50,9 +50,7 @@ if (!synth) {
     statusMessage.textContent = "お使いのブラウザは音声合成に非対応です。";
 }
 
-/**
- * 画面にメッセージを表示する関数 (LINE風表示に対応)
- */
+// 画面にメッセージを表示する関数
 function displayMessage(text, sender) {
     const messageContainer = document.createElement('div');
     const senderName = document.createElement('div');
@@ -73,9 +71,7 @@ function displayMessage(text, sender) {
     chatHistory.scrollTop = chatHistory.scrollHeight;
 }
 
-/**
- * テキストを音声で読み上げる関数
- */
+// テキストを音声で読み上げる関数
 function speak(text) {
     return new Promise((resolve, reject) => {
         if (isSpeaking) synth.cancel();
@@ -85,7 +81,7 @@ function speak(text) {
             utterThis.onend = () => {
                 isSpeaking = false;
                 if (live2dModel) {
-                    live2dModel.motion('Idle'); // 話し終わったら待機モーションに
+                    live2dModel.motion('Idle');
                 }
                 resolve();
             };
@@ -93,7 +89,6 @@ function speak(text) {
                 isSpeaking = false;
                 reject(event.error);
             };
-            // リップシンクを開始
             if (live2dModel) {
                 live2dModel.motion('Talk');
             }
@@ -109,9 +104,7 @@ if (synth.onvoiceschanged !== undefined) {
     synth.onvoiceschanged = () => synth.getVoices();
 }
 
-/**
- * サーバー経由でGemini APIにリクエストを送信する関数
- */
+// サーバー経由でGemini APIにリクエストを送信する関数
 async function getGeminiResponse(prompt) {
     setUiLoading(true);
     statusMessage.textContent = 'AIが応答を考えています...';
@@ -130,10 +123,10 @@ async function getGeminiResponse(prompt) {
         
         displayMessage(aiText, 'ai');
 
-        if (aiText.includes('嬉しい') || aiText.includes('ありがとう')) {
-            live2dModel.expression('F02'); // 笑顔
-        } else {
-            live2dModel.expression('F01'); // 通常の表情
+        if (live2dModel && (aiText.includes('嬉しい') || aiText.includes('ありがとう'))) {
+            live2dModel.expression('F02');
+        } else if (live2dModel) {
+            live2dModel.expression('F01');
         }
         
         statusMessage.textContent = 'AIが応答を読み上げています...';
@@ -150,9 +143,7 @@ async function getGeminiResponse(prompt) {
     }
 }
 
-/**
- * テキスト送信処理
- */
+// テキスト送信処理
 async function handleTextInput() {
     const userText = userInput.value.trim();
     if (userText) {
@@ -192,42 +183,49 @@ if (recognition) {
     });
 }
 
-// ▼ Live2Dのメイン処理を関数として定義 ▼
+// Live2Dのメイン処理を関数として定義
 async function initLive2D() {
-    // Live2Dモデルのパスを指定
-    const modelPath = '/assets/live2d_models/kei_jp/kei.model3.json';
+    try {
+        console.log("Live2Dの初期化を開始します...");
 
-    // PIXIのApplicationを作成
-    const app = new PIXI.Application({
-        view: canvas,
-        autoStart: true,
-        resizeTo: avatarContainer,
-        backgroundAlpha: 0,
-    });
+        const modelPath = '/assets/live2d_models/kei_jp/kei.model3.json';
 
-    // Live2Dモデルを読み込み
-    live2dModel = await PIXI.live2d.Live2DModel.from(modelPath, {
-        autoInteract: false
-    });
-    
-    app.stage.addChild(live2dModel);
+        const app = new PIXI.Application({
+            view: canvas,
+            autoStart: true,
+            resizeTo: avatarContainer,
+            backgroundAlpha: 0,
+        });
 
-    // モデルのサイズと位置を調整する関数
-    function resizeModel() {
-        if (!live2dModel) return;
-        const scale = (avatarContainer.clientHeight / live2dModel.height) * 0.9;
-        live2dModel.scale.set(scale);
-        live2dModel.position.set(avatarContainer.clientWidth / 2, avatarContainer.clientHeight / 2);
+        console.log("モデルを読み込みます:", modelPath);
+        live2dModel = await PIXI.live2d.Live2DModel.from(modelPath, {
+            autoInteract: false
+        });
+        
+        console.log("モデルの読み込みに成功しました:", live2dModel);
+        
+        app.stage.addChild(live2dModel);
+
+        function resizeModel() {
+            if (!live2dModel) return;
+            const scale = (avatarContainer.clientHeight / live2dModel.height) * 0.85;
+            live2dModel.scale.set(scale);
+            live2dModel.position.set(avatarContainer.clientWidth / 2, avatarContainer.clientHeight / 2);
+        }
+
+        setTimeout(resizeModel, 100);
+        window.addEventListener('resize', resizeModel);
+
+        live2dModel.internalModel.motionManager.startMotion('Idle');
+        console.log("Live2Dのセットアップが完了しました。");
+
+    } catch (e) {
+        console.error("Live2Dの初期化中に致命的なエラーが発生しました:", e);
+        // ここにエラーメッセージを画面に表示する処理を追加しても良い
     }
-
-    resizeModel();
-    window.addEventListener('resize', resizeModel);
-
-    // 自動でのまばたきや呼吸を有効にする
-    live2dModel.internalModel.motionManager.startMotion('Idle');
 }
 
-// ▼ すべてのライブラリが読み込まれた後にLive2Dの処理を開始 ▼
+// すべてのライブラリが読み込まれた後にLive2Dの処理を開始
 window.onload = () => {
     initLive2D();
 };
