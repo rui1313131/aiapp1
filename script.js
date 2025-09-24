@@ -192,10 +192,12 @@ if (recognition) {
     });
 }
 
-// ▼ここからLive2Dの処理▼
-(async function main() {
+// ▼ Live2Dのメイン処理を関数として定義 ▼
+async function initLive2D() {
+    // Live2Dモデルのパスを指定
     const modelPath = '/assets/live2d_models/kei_jp/kei.model3.json';
 
+    // PIXIのApplicationを作成
     const app = new PIXI.Application({
         view: canvas,
         autoStart: true,
@@ -203,23 +205,29 @@ if (recognition) {
         backgroundAlpha: 0,
     });
 
+    // Live2Dモデルを読み込み
     live2dModel = await PIXI.live2d.Live2DModel.from(modelPath, {
-        autoInteract: false // 自動でのまばたきなどを一旦停止
+        autoInteract: false
     });
     
     app.stage.addChild(live2dModel);
 
+    // モデルのサイズと位置を調整する関数
     function resizeModel() {
         if (!live2dModel) return;
         const scale = (avatarContainer.clientHeight / live2dModel.height) * 0.9;
         live2dModel.scale.set(scale);
         live2dModel.position.set(avatarContainer.clientWidth / 2, avatarContainer.clientHeight / 2);
     }
+
     resizeModel();
     window.addEventListener('resize', resizeModel);
 
     // 自動でのまばたきや呼吸を有効にする
     live2dModel.internalModel.motionManager.startMotion('Idle');
+}
 
-})();
-// ▲ここまでLive2Dの処理▲
+// ▼ すべてのライブラリが読み込まれた後にLive2Dの処理を開始 ▼
+window.onload = () => {
+    initLive2D();
+};
