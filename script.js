@@ -43,18 +43,19 @@ userInput.addEventListener('keydown', (event) => {
     }
 });
 
-async function handleSendMessage() {
-    const message = userInput.value.trim();
-    if (!message) return;
-
-    appendMessage(message, 'user');
-    userInput.value = '';
-
+async function sendMessageToAI(message) {
+    // Puterライブラリが読み込まれているか確認する
+    if (typeof puter === 'undefined') {
+        console.error("Puter.js library is not loaded.");
+        return "エラー：AIライブラリが読み込まれていません。";
+    }
+    
     try {
-        const aiResponse = await sendMessageToAI(message);
-        appendMessage(aiResponse, 'ai');
+        const response = await puter.chat(message, { model: 'x-ai/grok-4-fast' });
+        return response.message.content;
     } catch (error) {
-        appendMessage('エラーが発生しました。', 'ai');
+        console.error("Puter.js API Error:", error);
+        return "AIからの応答取得中にエラーが発生しました。";
     }
 }
 
